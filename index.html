@@ -3,24 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LEYDEMY - Loja Virtual</title>
+  <title>LEYDEMY ATELIÊ</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #fff7fb; color: #3b2436; }
-    main { max-width: 720px; margin: 0 auto; padding: 64px 24px; text-align: center; }
-    h1 { color: #c2185b; font-size: 48px; margin-bottom: 8px; }
-    p { font-size: 18px; line-height: 1.6; }
-    a { display: inline-block; margin-top: 24px; padding: 14px 28px;
-        background: #25d366; color: #fff; text-decoration: none;
-        border-radius: 8px; font-weight: bold; }
-    small { display: block; margin-top: 48px; opacity: 0.7; }
+    :root { --bg:#0e0e10; --line:rgba(255,255,255,.14); --txt:#f2f2f2; --muted:#8a8a8a; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--txt); font-family:Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+    header { border-bottom:1px solid var(--line); padding:26px 20px 20px; text-align:center; }
+    .brand { font-size:11px; letter-spacing:.34em; text-transform:uppercase; }
+    nav { border-bottom:1px solid var(--line); display:flex; justify-content:center; gap:28px; padding:16px 10px; }
+    nav a { color:var(--muted); font-size:9px; letter-spacing:.2em; text-decoration:none; text-transform:uppercase; cursor:pointer; }
+    nav a.ativo { color:var(--txt); }
+    main { max-width:520px; margin:0 auto; padding:34px 24px 130px; }
+    section { display:none; }
+    section.ativo { display:block; }
+    .eyebrow { font-size:9px; letter-spacing:.28em; color:var(--muted); text-transform:uppercase; }
+    h1 { font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:40px; margin:14px 0 26px; }
+    .btn { display:inline-block; background:transparent; color:var(--txt); border:1px solid var(--line);
+           border-radius:2px; padding:11px 15px; font-size:10px; letter-spacing:.16em;
+           text-transform:uppercase; cursor:pointer; text-decoration:none; }
+    .vazio { text-align:center; padding:86px 0 0; }
+    .vazio h2 { font-family:Georgia,'Times New Roman',serif; font-weight:400;
+                font-size:30px; line-height:1.3; margin:0 auto 16px; max-width:320px; }
+    .vazio p { color:var(--muted); font-size:12px; line-height:1.6; max-width:300px; margin:0 auto; }
+    form { display:grid; gap:14px; padding:20px 0; }
+    input,textarea { width:100%; background:transparent; border:1px solid var(--line);
+                     color:var(--txt); padding:12px; font:inherit; font-size:12px; }
+    .peca { border-top:1px solid var(--line); padding:24px 0; }
+    .peca img { width:100%; max-height:280px; object-fit:cover; display:block; margin-bottom:14px; }
+    .peca h3 { font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:24px; margin:0 0 8px; }
+    .peca p { color:var(--muted); font-size:12px; line-height:1.6; }
+    .preco { font-size:13px; margin:10px 0 16px; }
+    .chat { position:fixed; right:18px; bottom:18px; background:#f6f6f6; color:#111;
+            border:0; border-radius:999px; padding:12px 16px; font-size:11px; text-decoration:none; }
+    p.texto { color:var(--muted); font-size:13px; line-height:1.7; }
   </style>
 </head>
 <body>
+  <header><div class="brand">Leydemy Ateliê</div></header>
+  <nav>
+    <a class="ativo" data-secao="acervo">Acervo</a>
+    <a data-secao="novo">Novo anúncio</a>
+    <a data-secao="ser">Ser Leydemy</a>
+  </nav>
   <main>
-    <h1>LEYDEMY</h1>
-    <p>Sua loja virtual. Compre diretamente pelo WhatsApp.</p>
-    <a href="https://wa.me/554791907945">Falar com a LEYDEMY</a>
-    <small>Página oficial da loja.</small>
+    <section id="acervo" class="ativo">
+      <div class="eyebrow">Acervo</div>
+      <h1>Peças publicadas</h1>
+      <button class="btn" id="abrirForm">novo anúncio +</button>
+      <div class="vazio" id="vazio">
+        <h2>Nenhuma peça publicada ainda.</h2>
+        <p>Publique a primeira peça em bastidor para ela aparecer na vitrine.</p>
+      </div>
+      <div id="pecas"></div>
+    </section>
+    <section id="novo">
+      <div class="eyebrow">Novo anúncio</div>
+      <h1>Publicar peça</h1>
+      <form id="form">
+        <input id="nome" placeholder="Nome da peça" required>
+        <textarea id="descricao" rows="3" placeholder="Descrição"></textarea>
+        <input id="preco" type="number" min="0.01" step="0.01" placeholder="Preço R$" required>
+        <input id="foto" type="file" accept="image/*">
+        <button class="btn" type="submit">publicar</button>
+      </form>
+    </section>
+    <section id="ser">
+      <div class="eyebrow">Ser Leydemy</div>
+      <h1>Feito em bastidor</h1>
+      <p class="texto">Cada peça é criada com cuidado, do primeiro ponto ao último detalhe. Atendimento e compras diretamente pelo WhatsApp.</p>
+      <a class="btn" href="https://wa.me/554791907945">falar com a Leydemy</a>
+    </section>
   </main>
+  <a class="chat" href="https://wa.me/554791907945?text=Ol%C3%A1!%20Quero%20editar%20meu%20an%C3%BAncio%20da%20Leydemy.">Editar pelo chat</a>
+  <script>
+    const CHAVE = 'leydemy_pecas';
+    let pecas = JSON.parse(localStorage.getItem(CHAVE) || '[]');
+    const $ = id => document.getElementById(id);
+    const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    function salvar() { localStorage.setItem(CHAVE, JSON.stringify(pecas)); }
+    function render() {
+      $('vazio').style.display = pecas.length ? 'none' : 'block';
+      $('pecas').innerHTML = pecas.map((p, i) => `
+        <article class="peca">
+          ${p.foto ? `<img src="${p.foto}" alt="">` : ''}
+          <h3>${esc(p.nome)}</h3>
+          <p>${esc(p.descricao)}</p>
+          <div class="preco">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</div>
+          <a class="btn" target="_blank" rel="noopener"
+             href="https://wa.me/554791907945?text=${encodeURIComponent('Olá! Tenho interesse em ' + p.nome + ' da Leydemy.')}">comprar pelo whatsapp</a>
+          <button class="btn" onclick="remover(${i})">remover</button>
+        </article>`).join('');
+    }
+    function remover(i) { pecas.splice(i, 1); salvar(); render(); }
+    document.querySelectorAll('nav a').forEach(a => a.onclick = () => {
+      document.querySelectorAll('nav a').forEach(x => x.classList.remove('ativo'));
+      document.querySelectorAll('section').forEach(x => x.classList.remove('ativo'));
+      a.classList.add('ativo');
+      $(a.dataset.secao).classList.add('ativo');
+    });
+    $('abrirForm').onclick = () => document.querySelector('[data-secao="novo"]').click();
+    $('form').onsubmit = e => {
+      e.preventDefault();
+      const gravar = foto => {
+        pecas.unshift({ nome:$('nome').value, descricao:$('descricao').value, preco:$('preco').value, foto:foto || '' });
+        salvar(); render(); e.target.reset();
+        document.querySelector('[data-secao="acervo"]').click();
+      };
+      const arquivo = $('foto').files[0];
+      if (arquivo) { const leitor = new FileReader(); leitor.onload = () => gravar(leitor.result); leitor.readAsDataURL(arquivo); }
+      else gravar('');
+    };
+    render();
+  </script>
 </body>
 </html>
