@@ -19,7 +19,7 @@
     .eyebrow { font-size:9px; letter-spacing:.28em; color:var(--muted); text-transform:uppercase; }
     h1 { font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:40px; margin:14px 0 26px; }
     .btn { display:inline-block; background:transparent; color:var(--txt); border:1px solid var(--line);
-           border-radius:2px; padding:11px 15px; font-size:10px; letter-spacing:.16em;
+           border-radius:2px; padding:11px 15px; margin:4px 4px 4px 0; font-size:10px; letter-spacing:.16em;
            text-transform:uppercase; cursor:pointer; text-decoration:none; }
     .vazio { text-align:center; padding:86px 0 0; }
     .vazio h2 { font-family:Georgia,'Times New Roman',serif; font-weight:400;
@@ -33,8 +33,10 @@
     .peca h3 { font-family:Georgia,'Times New Roman',serif; font-weight:400; font-size:24px; margin:0 0 8px; }
     .peca p { color:var(--muted); font-size:12px; line-height:1.6; }
     .preco { font-size:13px; margin:10px 0 16px; }
-    .chat { position:fixed; right:18px; bottom:18px; background:#f6f6f6; color:#111;
-            border:0; border-radius:999px; padding:12px 16px; font-size:11px; text-decoration:none; }
+    .chat, .copiado { position:fixed; right:18px; background:#f6f6f6; color:#111;
+                      border:0; border-radius:999px; padding:12px 16px; font-size:11px; text-decoration:none; }
+    .chat { bottom:18px; }
+    .copiado { bottom:70px; display:none; }
     p.texto { color:var(--muted); font-size:13px; line-height:1.7; }
   </style>
 </head>
@@ -50,6 +52,7 @@
       <div class="eyebrow">Acervo</div>
       <h1>Peças publicadas</h1>
       <button class="btn" id="abrirForm">novo anúncio +</button>
+      <div id="compartilhado"></div>
       <div class="vazio" id="vazio">
         <h2>Nenhuma peça publicada ainda.</h2>
         <p>Publique a primeira peça em bastidor para ela aparecer na vitrine.</p>
@@ -74,27 +77,63 @@
       <a class="btn" href="https://wa.me/554791907945">falar com a Leydemy</a>
     </section>
   </main>
+  <div class="copiado" id="copiado">Link copiado!</div>
   <a class="chat" href="https://wa.me/554791907945?text=Ol%C3%A1!%20Quero%20editar%20meu%20an%C3%BAncio%20da%20Leydemy.">Editar pelo chat</a>
   <script>
     const CHAVE = 'leydemy_pecas';
+    const WHATSAPP = '554791907945';
     let pecas = JSON.parse(localStorage.getItem(CHAVE) || '[]');
+    let compartilhada = null;
     const $ = id => document.getElementById(id);
     const esc = s => (s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    const codificar = p => btoa(unescape(encodeURIComponent(JSON.stringify(p))));
+    const decodificar = c => JSON.parse(decodeURIComponent(escape(atob(c))));
+    const linkPeca = p => location.origin + location.pathname + '?p=' + codificar(p);
+    const linkCompra = p => 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Olá! Tenho interesse em ' + p.nome + ' da Leydemy.');
     function salvar() { localStorage.setItem(CHAVE, JSON.stringify(pecas)); }
+    function copiar(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        $('copiado').style.display = 'block';
+        setTimeout(() => $('copiado').style.display = 'none', 2200);
+      }).catch(() => prompt('Copie o link:', url));
+    }
+    function compartilhar(i) {
+      const p = pecas[i];
+      const url = linkPeca(p);
+      if (navigator.share) navigator.share({ title:p.nome, text:'Veja esta peça da Leydemy.', url }).catch(() => copiar(url));
+      else copiar(url);
+    }
+    function card(p, acoes) {
+      return `<article class="peca">
+        ${p.foto ? `<img src="${p.foto}" alt="">` : ''}
+        <h3>${esc(p.nome)}</h3>
+        <p>${esc(p.descricao)}</p>
+        <div class="preco">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</div>
+        ${acoes}
+      </article>`;
+    }
     function render() {
       $('vazio').style.display = pecas.length ? 'none' : 'block';
-      $('pecas').innerHTML = pecas.map((p, i) => `
-        <article class="peca">
-          ${p.foto ? `<img src="${p.foto}" alt="">` : ''}
-          <h3>${esc(p.nome)}</h3>
-          <p>${esc(p.descricao)}</p>
-          <div class="preco">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</div>
-          <a class="btn" target="_blank" rel="noopener"
-             href="https://wa.me/554791907945?text=${encodeURIComponent('Olá! Tenho interesse em ' + p.nome + ' da Leydemy.')}">comprar pelo whatsapp</a>
-          <button class="btn" onclick="remover(${i})">remover</button>
-        </article>`).join('');
+      $('pecas').innerHTML = pecas.map((p, i) => card(p, `
+        <a class="btn" target="_blank" rel="noopener" href="${linkCompra(p)}">comprar pelo whatsapp</a>
+        <button class="btn" onclick="compartilhar(${i})">compartilhar</button>
+        <button class="btn" onclick="remover(${i})">remover</button>`)).join('');
     }
     function remover(i) { pecas.splice(i, 1); salvar(); render(); }
+    function salvarCompartilhada() {
+      pecas.unshift(compartilhada); salvar(); render();
+      $('compartilhado').innerHTML = '';
+      document.querySelector('[data-secao="acervo"]').click();
+    }
+    const param = new URLSearchParams(location.search).get('p');
+    if (param) {
+      try {
+        compartilhada = decodificar(param);
+        $('compartilhado').innerHTML = '<div class="eyebrow">Peça compartilhada</div>' +
+          card(compartilhada, `<a class="btn" target="_blank" rel="noopener" href="${linkCompra(compartilhada)}">comprar pelo whatsapp</a>
+          <button class="btn" onclick="salvarCompartilhada()">salvar no acervo</button>`);
+      } catch (erro) { $('compartilhado').innerHTML = ''; }
+    }
     document.querySelectorAll('nav a').forEach(a => a.onclick = () => {
       document.querySelectorAll('nav a').forEach(x => x.classList.remove('ativo'));
       document.querySelectorAll('section').forEach(x => x.classList.remove('ativo'));
